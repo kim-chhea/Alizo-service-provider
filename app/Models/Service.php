@@ -12,10 +12,6 @@ class Service extends Model
     {
         return $this->belongsToMany(Service::class , 'order_services')->withTimestamps();
     }
-    public function discount()
-    {
-        return $this->belongsToMany(discount::class , 'service_discount')->withTimestamps();
-    }
     public function categories()
     {
         return $this->belongsToMany(Category::class,'service_categories')->withTimestamps();
