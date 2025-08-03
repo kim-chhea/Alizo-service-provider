@@ -17,7 +17,7 @@ class IsOwner
     public function handle(Request $request, Closure $next): Response
     {
         // get token from header using laravel sanctum 
-        $user =  Auth::user();
+        $user = $request->user('sanctum');
         // access to id of role table 
         if($user && $user->role_id == 3)
         {
