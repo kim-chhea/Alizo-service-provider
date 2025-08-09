@@ -25,8 +25,7 @@ class IsUser
         return $next($request);
 
         }
-        return response()->json([
-            'message' => 'Forbidden. You are not allowed to access this resource.'
-        ], 403);
+        return response()->json(['message' => 'Please login or register' , 'status' => 401], 401);
+        
     }
 }

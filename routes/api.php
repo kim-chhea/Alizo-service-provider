@@ -28,17 +28,17 @@ Route::delete('/logout',[AuthController::class , 'logout']);
 });
 //user route
 Route::prefix('/allizo')->group(function(){
-Route::apiResource('/users',UserController::class);
+Route::apiResource('/users',UserController::class)->middleware('IsLogin');
 //location route
 Route::get('/locations',[LocationController::class,'index']);
 Route::get('/locations/{id}',[LocationController::class,'show']);
-Route::post('/locations',[LocationController::class,'store'])->middleware('IsLogin');//both
+Route::post('/locations',[LocationController::class,'store'])->middleware('IsUser');
 Route::put('/locations/{id}',[LocationController::class,'update'])->middleware('IsUser');
-Route::delete('/locations/{id}',[LocationController::class,'destroy'])->middleware('IsLogin');
+Route::delete('/locations/{id}',[LocationController::class,'destroy'])->middleware('IsUser');
 
 //role route
 Route::get('/roles', [RoleController::class, 'index'])->middleware('IsAdmin'); // View all roles
-Route::get('/roles/{id}', [RoleController::class, 'show'])->middleware('IsUser'); // View one role
+Route::get('/roles/{id}', [RoleController::class, 'show'])->middleware('IsAdmin'); // View one role
 Route::post('/roles', [RoleController::class, 'store'])->middleware('IsAdmin'); // Create role (optional)
 Route::put('/roles/{id}', [RoleController::class, 'update'])->middleware('IsAdmin'); // Update role (optional)
 Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->middleware('IsAdmin'); // Delete role
@@ -62,8 +62,8 @@ Route::post('/services/{serviceId}/reviews',[ReviewController::class,'review'])-
 //categories route
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
-Route::post('/categories', [CategoryController::class, 'store'])->middleware('IsUser');
-Route::put('/categories/{id}', [CategoryController::class, 'update'])->middleware('IsAdmin');
+Route::post('/categories', [CategoryController::class, 'store'])->middleware('IsOwner');
+Route::put('/categories/{id}', [CategoryController::class, 'update'])->middleware('IsOwner');
 Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->middleware('IsAdmin');
 
 //
