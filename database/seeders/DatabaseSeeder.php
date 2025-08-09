@@ -24,7 +24,6 @@ class DatabaseSeeder extends Seeder
            CategorieSeeder::class,
            ServiceSeeder::class,
            BookingSeeder::class,
-           DiscountSeeder::class,
            CartSeeder::class,
            ReviewSeeder::class,
            PaymentSeeder::class,
@@ -32,7 +31,6 @@ class DatabaseSeeder extends Seeder
            OrderSeeder::class,
           OrderServiceSeeder::class,
           serviceCategoriesSeeder::class,
-          ServiceDiscountSeeder::class,
           SeedersBookingServiceSeeder::class,
           CartServiceSeeder::class,
           WishlistServiceSeeder::class

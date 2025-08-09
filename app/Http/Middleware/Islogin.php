@@ -16,12 +16,12 @@ class Islogin
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user('sanctum');
-        if($user && $user->role_id !== null)
+        if($user)
         {
             return $next($request);
         }
-        if(!$user) 
-         {
+        if(!$user ) 
+        {
             return response()->json(['message' => 'Please login or register' , 'status' => 401], 401);
         }
         return response()->json(['message' => 'Unauthentication' ,'status' => 401], 401);

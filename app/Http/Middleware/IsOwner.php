@@ -22,7 +22,6 @@ class IsOwner
         if($user && $user->role_id == 3)
         {
         return $next($request);
-
         }
         return response()->json([
             'message' => 'Forbidden. You are not allowed to access this resource.'

@@ -56,7 +56,7 @@ class LocationController extends Controller
         try
         {
           $ValidatedData = $request->validate([
-            "address" => "required|string",
+            "address" => "required|string|unique:locations,address",
             "city" => "required|string",
             "postal_code" => "required|integer"
           ]);

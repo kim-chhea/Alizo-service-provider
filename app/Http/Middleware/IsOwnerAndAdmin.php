@@ -4,11 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Laravel\Sanctum\Sanctum;
 use Symfony\Component\HttpFoundation\Response;
 
-class IsUser
+class IsOwnerAndAdmin
 {
     /**
      * Handle an incoming request.
@@ -17,15 +15,6 @@ class IsUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // get token from header using laravel sanctum 
-        $user = $request->user('sanctum');
-        // access to id of role table 
-        if($user && $user->role_id == 1)
-        {
         return $next($request);
-
-        }
-        return response()->json(['message' => 'Please login or register' , 'status' => 401], 401);
-        
     }
 }
