@@ -13,7 +13,6 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WishlistController;
-use App\Models\payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -121,7 +120,6 @@ Route::get('order/{id}', [OrderController::class, 'show'])->middleware('IsUser')
 Route::post('order', [OrderController::class, 'store'])->middleware('IsUser'); 
 Route::put('order/{id}', [OrderController::class, 'update'])->middleware('IsUser'); 
 Route::delete('order/{id}', [OrderController::class, 'destroy'])->middleware('IsUser');
-//get ordered
 Route::get('order/receipt', [OrderController::class, 'getReceipt'])->middleware('IsUser');
 });
 
