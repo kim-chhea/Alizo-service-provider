@@ -27,21 +27,22 @@ Route::delete('/logout',[AuthController::class , 'logout']);
 });
 //user route
 Route::prefix('/allizo')->group(function(){
-Route::apiResource('/users',UserController::class)->middleware('IsLogin');
+Route::apiResource('/users',UserController::class);
+// ->middleware('IsLogin')
 //location route
 Route::get('/locations',[LocationController::class,'index']);
 Route::get('/locations/{id}',[LocationController::class,'show']);
-Route::post('/locations',[LocationController::class,'store'])->middleware('IsUser');
-Route::put('/locations/{id}',[LocationController::class,'update'])->middleware('IsUser');
-Route::delete('/locations/{id}',[LocationController::class,'destroy'])->middleware('IsUser');
+Route::post('/locations',[LocationController::class,'store']);
+Route::put('/locations/{id}',[LocationController::class,'update']);
+Route::delete('/locations/{id}',[LocationController::class,'destroy']);
 
 //role route
-Route::get('/roles', [RoleController::class, 'index'])->middleware('IsAdmin'); // View all roles
-Route::get('/roles/{id}', [RoleController::class, 'show'])->middleware('IsAdmin'); // View one role
-Route::post('/roles', [RoleController::class, 'store'])->middleware('IsAdmin'); // Create role (optional)
-Route::put('/roles/{id}', [RoleController::class, 'update'])->middleware('IsAdmin'); // Update role (optional)
-Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->middleware('IsAdmin'); // Delete role
-
+Route::get('/roles', [RoleController::class, 'index']); // View all roles
+Route::get('/roles/{id}', [RoleController::class, 'show']); // View one role
+Route::post('/roles', [RoleController::class, 'store']); // Create role (optional)
+Route::put('/roles/{id}', [RoleController::class, 'update']); // Update role (optional)
+Route::delete('/roles/{id}', [RoleController::class, 'destroy']); // Delete role
+// ->middleware('IsAdmin')
 // User-Role Management
 Route::post('/users/{userId}/roles/{roleId}', [RoleController::class, 'assignRole'])->middleware('IsAdmin');// Assign role to user
 Route::delete('/users/{userId}/roles/{roleId}', [RoleController::class, 'removeRole'])->middleware('IsAdmin');// Remove role from user
@@ -61,52 +62,53 @@ Route::post('/services/{serviceId}/reviews',[ReviewController::class,'review'])-
 //categories route
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
-Route::post('/categories', [CategoryController::class, 'store'])->middleware('IsOwner');
-Route::put('/categories/{id}', [CategoryController::class, 'update'])->middleware('IsOwner');
-Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->middleware('IsAdmin');
+Route::post('/categories', [CategoryController::class, 'store']);
+Route::put('/categories/{id}', [CategoryController::class, 'update']);
+Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 
 //
 //service route
 Route::get('/services', [ServiceController::class, 'index']); 
 Route::get('/services/{id}', [ServiceController::class, 'show']);
-Route::post('/services', [ServiceController::class, 'store'])->middleware('IsOwner'); 
-Route::put('/services/{id}', [ServiceController::class, 'update'])->middleware('IsOwner');
-Route::delete('/services/{id}', [ServiceController::class, 'destroy'])->middleware('IsOwner');
+Route::post('/services', [ServiceController::class, 'store']); 
+Route::put('/services/{id}', [ServiceController::class, 'update']);
+Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
+// ->middleware('IsOwner')
 
 //Route cart
-Route::get('/carts', [CartController::class, 'index'])->middleware('IsAdmin'); 
-Route::get('/carts/{id}', [CartController::class, 'show'])->middleware('IsUser');
-Route::post('/carts', [CartController::class, 'store'])->middleware('IsAdmin'); 
-Route::put('/carts/{id}', [CartController::class, 'update'])->middleware('IsAdmin'); 
-Route::delete('/carts/{id}', [CartController::class, 'destroy'])->middleware('IsAdmin');
+Route::get('/carts', [CartController::class, 'index']); 
+Route::get('/carts/{id}', [CartController::class, 'show']);
+Route::post('/carts', [CartController::class, 'store']); 
+Route::put('/carts/{id}', [CartController::class, 'update']); 
+Route::delete('/carts/{id}', [CartController::class, 'destroy']);
 
 //cart managements
 Route::post('/cart/{cartId}/service', [CartController::class, 'addToCart'])->middleware('IsUser');
 Route::delete('/cart/{cartId}/service', [CartController::class, 'removeService'])->middleware('IsUser');
 
 //route wishlist
-Route::get('/wishlist', [WishlistController::class, 'index'])->middleware('IsAdmin'); 
-Route::get('/wishlist/{id}', [WishlistController::class, 'show'])->middleware('IsUser');
-Route::post('/wishlist', [WishlistController::class, 'store'])->middleware('IsUser'); 
-Route::put('/wishlist/{id}', [WishlistController::class, 'update'])->middleware('IsUser'); 
-Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->middleware('IsAdmin');
+Route::get('/wishlist', [WishlistController::class, 'index']); 
+Route::get('/wishlist/{id}', [WishlistController::class, 'show']);
+Route::post('/wishlist', [WishlistController::class, 'store']); 
+Route::put('/wishlist/{id}', [WishlistController::class, 'update']); 
+Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy']);
 
 //wishlist managements
 Route::post('/wishlist/{wishlistId}/service', [WishlistController::class, 'addService'])->middleware('IsUser');
 Route::delete('/wishlist/{wishlistId}/service', [WishlistController::class, 'removeService'])->middleware('IsUser');
 
 //Booking route
-Route::get('/booking', [BookingController::class, 'index'])->middleware('IsAdmin'); 
-Route::get('/booking/{id}', [BookingController::class, 'show'])->middleware('IsUser');
-Route::post('/booking', [BookingController::class, 'store'])->middleware('IsUser'); 
-Route::put('/booking/{id}', [BookingController::class, 'update'])->middleware('IsUser'); 
-Route::delete('/booking/{id}', [BookingController::class, 'destroy'])->middleware('IsAdmin');
+Route::get('/booking', [BookingController::class, 'index']);
+Route::get('/booking/{id}', [BookingController::class, 'show']);
+Route::post('/booking', [BookingController::class, 'store']); 
+Route::put('/booking/{id}', [BookingController::class, 'update']); 
+Route::delete('/booking/{id}', [BookingController::class, 'destroy']);
 //booking management 
-Route::post('/booking/{bookingId}/service/{serviceId}', [BookingController::class, 'addService'])->middleware('IsUser');
-Route::delete('/booking/{bookingId}/service/{serviceId}', [BookingController::class, 'removeService'])->middleware('IsUser');
-Route::post('/booking/checkout', [BookingController::class, 'checkoutFromCart'])->middleware('IsUser');
+Route::post('/booking/{bookingId}/service/{serviceId}', [BookingController::class, 'addService']);
+Route::delete('/booking/{bookingId}/service/{serviceId}', [BookingController::class, 'removeService']);
+Route::post('/booking/checkout', [BookingController::class, 'checkoutFromCart']);
 //payment route
-Route::get('/payment', [PaymentController::class, 'index'])->middleware('IsAdmin'); 
+Route::get('/payment', [PaymentController::class, 'index']);
 Route::get('/payment/{id}', [PaymentController::class, 'show'])->middleware('IsUser');
 Route::post('/payment', [PaymentController::class, 'store'])->middleware('IsUser'); 
 Route::put('/payment/{id}', [PaymentController::class, 'update'])->middleware('IsUser'); 
@@ -115,7 +117,7 @@ Route::delete('/payment/{id}', [PaymentController::class, 'destroy'])->middlewar
 Route::post('/payment/checkout',[PaymentController::class,'payment'])->middleware('IsUser');
 
 //order route
-Route::get('order', [OrderController::class, 'index'])->middleware('IsAdmin'); 
+Route::get('order', [OrderController::class, 'index']) ;
 Route::get('order/{id}', [OrderController::class, 'show'])->middleware('IsUser');
 Route::post('order', [OrderController::class, 'store'])->middleware('IsUser'); 
 Route::put('order/{id}', [OrderController::class, 'update'])->middleware('IsUser'); 

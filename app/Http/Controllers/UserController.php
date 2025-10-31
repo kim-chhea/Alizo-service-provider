@@ -7,33 +7,52 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+
+/**
+ * @OA\Tag(
+ *     name="Users",
+ *     description="API Endpoints for managing users"
+ * )
+ */
+
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     * 
-     */
-    /**
      * @OA\Get(
-     *     path="/api/users",
+     *     path="/api/allizo/users",
      *     summary="Get all users",
+     *     tags={"Users"},
      *     @OA\Response(
      *         response=200,
-     *         description="Success"
+     *         description="Users retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="integer", example=200),
+     *             @OA\Property(property="message", type="string", example="Users retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="name", type="string"),
+     *                     @OA\Property(property="email", type="string"),
+     *                     @OA\Property(property="location_id", type="integer", nullable=true),
+     *                     @OA\Property(property="role_id", type="integer")
+     *                 )
+     *             )
+     *         )
      *     )
      * )
      */
     public function index()
     {
-        try
-        {
-
+        try {
             $user = User::with(['location:id,address,city,postal_code','role:id,name'])->get(['id','name','email','location_id', 'role_id']);
-            if(!$user)
-            {
+            if(!$user) {
                 return response()->json([
                    'message' => 'No users found.',
-                    'status' => 404,
+                   'status' => 404,
                 ]);
             }
             return response()->json([
@@ -41,142 +60,200 @@ class UserController extends Controller
                 'status' => 200,
                 'data' => $user,
             ]);
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
 
-
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-        
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/allizo/users",
+     *     summary="Create a new user",
+     *     tags={"Users"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","role_id"},
+     *             @OA\Property(property="name", type="string", maxLength=20),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="password", type="string", minLength=6, maxLength=16),
+     *             @OA\Property(property="location_id", type="integer", nullable=true),
+     *             @OA\Property(property="role_id", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User created successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
-        try
-        {
-          $ValidatedData = $request->validate([
-            "name" => "required|string|max:20",
-            "email"=> "required|email|unique:users,email",
-            "password" => "required|string|min:6|max:16",
-            "location_id" => "nullable|integer",
-            "role_id" => 'required|integer'
-          ]);
-          $ValidatedData['password'] = Hash::make($ValidatedData['password']);
-          $user = User::create($ValidatedData);
-          if(!$user)
-          {
-            throw new CustomeExceptions('User creation failed due to an unexpected error.', 500);
-          }
-          return response()->json([
-            'message' => 'User registered successfully.',
-            'status' => 201,
-            'data' => $user,
-        ]);
+        try {
+            $ValidatedData = $request->validate([
+                "name" => "required|string|max:20",
+                "email"=> "required|email|unique:users,email",
+                "password" => "required|string|min:6|max:16",
+                "location_id" => "nullable|integer",
+                "role_id" => 'required|integer'
+            ]);
+            $ValidatedData['password'] = Hash::make($ValidatedData['password']);
+            $user = User::create($ValidatedData);
 
-        }
-        catch(Exception $e)
-        {
+            if(!$user) {
+                throw new CustomeExceptions('User creation failed due to an unexpected error.', 500);
+            }
+
+            return response()->json([
+                'message' => 'User registered successfully.',
+                'status' => 201,
+                'data' => $user,
+            ]);
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/allizo/users/{id}",
+     *     summary="Get user by ID",
+     *     tags={"Users"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User retrieved successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     )
+     * )
      */
     public function show(string $id)
     {
-        try
-        {
+        try {
+            $user = User::with(['location:id,address,city,postal_code','role:id,name'])
+                        ->select(['id','name','email','location_id', 'role_id'])
+                        ->findOrFail($id);
 
-            $user = User::with(['location:id,address,city,postal_code','location:id,name'])->select(['id','name','email','location_id', 'role_id'])->findOrFail($id);
             return response()->json([
-                'message' => 'Users retrieved successfully.',
+                'message' => 'User retrieved successfully.',
                 'status' => 200,
                 'data' => $user,
             ]);
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/api/allizo/users/{id}",
+     *     summary="Update user",
+     *     tags={"Users"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", maxLength=20),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="password", type="string", minLength=6, maxLength=16),
+     *             @OA\Property(property="location_id", type="integer", nullable=true),
+     *             @OA\Property(property="role_id", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User updated successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     )
+     * )
      */
     public function update(Request $request, string $id)
     {
-        try
-        {
-          $ValidatedData = $request->validate([
-            "name" => "sometimes|string|max:20",
-            "email"=> "sometimes|email|unique:users,email,".$id,
-            "password" => "sometimes|string|min:6|max:16",
-            "location_id" => "sometimes|nullable|integer",
-            "role_id" => 'sometimes|integer'
-          ]);
-          if(isset($ValidatedData['password']))
-          {
-          $ValidatedData['password'] = Hash::make($ValidatedData['password']);
-          }
+        try {
+            $ValidatedData = $request->validate([
+                "name" => "sometimes|string|max:20",
+                "email"=> "sometimes|email|unique:users,email,".$id,
+                "password" => "sometimes|string|min:6|max:16",
+                "location_id" => "sometimes|nullable|integer",
+                "role_id" => 'sometimes|integer'
+            ]);
 
-          $user = User::findOrFail($id);
-          $updatedSuccess = $user->update($ValidatedData);
-          if(!$updatedSuccess)
-          {
-            throw new CustomeExceptions('User updation failed due to an unexpected error.', 500);
-          }
-          return response()->json([
-            'message' => 'User updated successfully.',
-            'status' => 200,
-            'data' => $user,
-        ]);
+            if(isset($ValidatedData['password'])) {
+                $ValidatedData['password'] = Hash::make($ValidatedData['password']);
+            }
 
-        }
-        catch(Exception $e)
-        {
+            $user = User::findOrFail($id);
+            $updatedSuccess = $user->update($ValidatedData);
+
+            if(!$updatedSuccess) {
+                throw new CustomeExceptions('User updation failed due to an unexpected error.', 500);
+            }
+
+            return response()->json([
+                'message' => 'User updated successfully.',
+                'status' => 200,
+                'data' => $user,
+            ]);
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/allizo/users/{id}",
+     *     summary="Delete user",
+     *     tags={"Users"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User deleted successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     )
+     * )
      */
     public function destroy(string $id)
     {
-        try
-        {
-
+        try {
             $user = User::findOrFail($id);
             $user->delete();
             return response()->json([
-                'message' => 'Users deleted successfully.',
+                'message' => 'User deleted successfully.',
                 'status' => 200,
             ]);
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
-
     }
 }

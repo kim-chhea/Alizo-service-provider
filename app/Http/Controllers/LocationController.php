@@ -7,159 +7,216 @@ use App\Models\Location;
 use Exception;
 use Illuminate\Http\Request;
 
-
+/**
+ * @OA\Tag(
+ *     name="Location",
+ *     description="API Endpoints for managing locations"
+ * )
+ */
 class LocationController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/allizo/locations",
+     *     summary="Get all locations",
+     *     tags={"Location"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Locations retrieved successfully."
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No locations found."
+     *     )
+     * )
      */
     public function index()
     {
-        try
-        {
-
+        try {
             $location = Location::get();
-            if(!$location)
-            {
+            if(!$location) {
                 return response()->json([
                    'message' => 'No locations found.',
                     'status' => 404,
                 ]);
             }
             return response()->json([
-                'message' => 'locations retrieved successfully.',
+                'message' => 'Locations retrieved successfully.',
                 'status' => 200,
                 'data' => $location,
             ]);
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
 
-
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-        
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/allizo/locations",
+     *     summary="Create a new location",
+     *     tags={"Location"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"address","city","postal_code"},
+     *             @OA\Property(property="address", type="string", example="123 Main St"),
+     *             @OA\Property(property="city", type="string", example="Phnom Penh"),
+     *             @OA\Property(property="postal_code", type="integer", example=12000)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Location created successfully."
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation failed or location already exists."
+     *     )
+     * )
      */
     public function store(Request $request)
     {
-        try
-        {
-          $ValidatedData = $request->validate([
-            "address" => "required|string|unique:locations,address",
-            "city" => "required|string",
-            "postal_code" => "required|integer"
-          ]);
-         
-          $location = location::create($ValidatedData);
-          if(!$location)
-          {
-            throw new CustomeExceptions('location creation failed due to an unexpected error.', 500);
-          }
-          return response()->json([
-            'message' => 'location created successfully.',
-            'status' => 201,
-            'data' => $location,
-        ]);
-
-        }
-        catch(Exception $e)
-        {
+        try {
+            $ValidatedData = $request->validate([
+                "address" => "required|string|unique:locations,address",
+                "city" => "required|string",
+                "postal_code" => "required|integer"
+            ]);
+            $location = Location::create($ValidatedData);
+            if(!$location) {
+                throw new CustomeExceptions('Location creation failed due to an unexpected error.', 500);
+            }
+            return response()->json([
+                'message' => 'Location created successfully.',
+                'status' => 201,
+                'data' => $location,
+            ]);
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/allizo/locations/{id}",
+     *     summary="Get a location by ID",
+     *     tags={"Location"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Location ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Location retrieved successfully."
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Location not found."
+     *     )
+     * )
      */
     public function show(string $id)
     {
-        try
-        {
-
-            $location = location::findOrFail($id);
+        try {
+            $location = Location::findOrFail($id);
             return response()->json([
-                'message' => 'locations retrieved successfully.',
+                'message' => 'Locations retrieved successfully.',
                 'status' => 200,
                 'data' => $location,
             ]);
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/api/allizo/locations/{id}",
+     *     summary="Update a location by ID",
+     *     tags={"Location"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Location ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="address", type="string", example="456 Main St"),
+     *             @OA\Property(property="city", type="string", example="Siem Reap"),
+     *             @OA\Property(property="postal_code", type="integer", example=13000)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Location updated successfully."
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Location not found."
+     *     )
+     * )
      */
     public function update(Request $request, string $id)
     {
-        try
-        {
+        try {
             $ValidatedData = $request->validate([
                 "address" => "sometimes|string",
                 "city" => "sometimes|string",
                 "postal_code" => "sometimes|string"
-              ]);
-             
-
-          $location = location::findOrFail($id);
-          $updatedSuccess = $location->update($ValidatedData);
-          if(!$updatedSuccess)
-          {
-            throw new CustomeExceptions('location updation failed due to an unexpected error.', 500);
-          }
-          return response()->json([
-            'message' => 'location updated successfully.',
-            'status' => 200,
-            'data' => $location,
-        ]);
-
-        }
-        catch(Exception $e)
-        {
+            ]);
+            $location = Location::findOrFail($id);
+            $updatedSuccess = $location->update($ValidatedData);
+            if(!$updatedSuccess) {
+                throw new CustomeExceptions('Location updation failed due to an unexpected error.', 500);
+            }
+            return response()->json([
+                'message' => 'Location updated successfully.',
+                'status' => 200,
+                'data' => $location,
+            ]);
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/allizo/locations/{id}",
+     *     summary="Delete a location by ID",
+     *     tags={"Location"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Location ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Location deleted successfully."
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Location not found."
+     *     )
+     * )
      */
     public function destroy(string $id)
     {
-        try
-        {
-
-            $location = location::findOrFail($id);
+        try {
+            $location = Location::findOrFail($id);
             $location->delete();
             return response()->json([
-                'message' => 'locations deleted successfully.',
+                'message' => 'Locations deleted successfully.',
                 'status' => 200,
             ]);
-        }
-        catch(Exception $e)
-        {
+        } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
-
     }
 }

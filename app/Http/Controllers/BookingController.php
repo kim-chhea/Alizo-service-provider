@@ -14,11 +14,23 @@ use Illuminate\Support\Facades\Redis;
 use function PHPUnit\Framework\isEmpty;
 
 // use Illuminate\Support\Facades\Hash;
-
+/** 
+* @OA\Tag(
+ *     name="Booking",
+ *     description="APIs for managing bookings"
+ * )
+     */
 class BookingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
+
+     /**
+     * @OA\Get(
+     *     path="/api/allizo/booking",
+     *     tags={"Booking"},
+     *     summary="Get all bookings",
+     *     @OA\Response(response=200, description="Bookings retrieved successfully"),
+     *     @OA\Response(response=404, description="No bookings found")
+     * )
      */
     public function index()
     {
@@ -57,6 +69,21 @@ class BookingController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     *  /**
+     * @OA\Post(
+     *     path="/api/allizo/booking",
+     *     tags={"Booking"},
+     *     summary="Create a booking",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"user_id"},
+     *             @OA\Property(property="user_id", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Booking created successfully"),
+     *     @OA\Response(response=500, description="Booking creation failed")
+     * )
      */
     public function store(Request $request)
     {
@@ -86,6 +113,20 @@ class BookingController extends Controller
 
     /**
      * Display the specified resource.
+     *  /**
+     * @OA\Get(
+     *     path="/api/allizo/booking/{id}",
+     *     tags={"Booking"},
+     *     summary="Get a booking by ID",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Booking retrieved successfully"),
+     *     @OA\Response(response=404, description="Booking not found")
+     * )
      */
     public function show(string $id)
     {
@@ -115,6 +156,21 @@ class BookingController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * /**
+     * @OA\Put(
+     *     path="/api/allizo/booking/{id}",
+     *     tags={"Booking"},
+     *     summary="Update a booking",
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user_id", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Booking updated successfully"),
+     *     @OA\Response(response=500, description="Booking update failed")
+     * )
      */
     public function update(Request $request,$id)
     {
@@ -146,6 +202,15 @@ class BookingController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * /**
+     * @OA\Delete(
+     *     path="/api/allizo/booking/{id}",
+     *     tags={"Booking"},
+     *     summary="Delete a booking",
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Booking deleted successfully"),
+     *     @OA\Response(response=500, description="Booking deletion failed")
+     * )
      */
     public function destroy(string $id)
     {
@@ -165,6 +230,26 @@ class BookingController extends Controller
         }
 
     }
+    /**
+     * @OA\Post(
+     *     path="/api/allizo/booking/{bookingId}/service/{serviceId}",
+     *     tags={"Booking"},
+     *     summary="Add a service to booking",
+     *     @OA\Parameter(name="bookingId", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="serviceId", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"booking_date","time_slot","status"},
+     *             @OA\Property(property="booking_data", type="string", format="date"),
+     *             @OA\Property(property="time_slot", type="string", format="H:i:s"),
+     *             @OA\Property(property="status", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Service added successfully"),
+     *     @OA\Response(response=400, description="Service already exists")
+     * )
+     */
 
     public function addService(Request $request , $bookingId , $serviceId)
     {
@@ -209,6 +294,28 @@ class BookingController extends Controller
         throw new CustomeExceptions($e->getMessage() , 500);
         }
     }
+    /**
+ * @OA\Delete(
+ *     path="/api/allizo/booking/{bookingId}/service/{serviceId}",
+ *     tags={"Booking"},
+ *     summary="Remove a service from a booking",
+ *     @OA\Parameter(
+ *         name="bookingId",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Parameter(
+ *         name="serviceId",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(response=200, description="Service removed from booking successfully"),
+ *     @OA\Response(response=404, description="Service not found in this booking"),
+ *     @OA\Response(response=500, description="Unexpected error")
+ * )
+ */
     public function removeService(Request $request , $bookingId,$serviceId)
     {
         try

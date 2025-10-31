@@ -11,11 +11,24 @@ use Illuminate\Support\Facades\Redis;
 use function PHPUnit\Framework\isEmpty;
 
 // use Illuminate\Support\Facades\Hash;
-
+/**
+ * @OA\Tag(
+ *     name="Carts",
+ *     description="API Endpoints for managing carts"
+ * )
+ */
 class CartController extends Controller
 {
     /**
      * Display a listing of the resource.
+     *  /**
+     * @OA\Get(
+     *     path="/api/allizo/carts",
+     *     summary="Get all carts",
+     *     tags={"Carts"},
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="No carts found")
+     * )
      */
     public function index()
     {
@@ -49,6 +62,22 @@ class CartController extends Controller
     public function create()
     {
         //
+        /**
+     * @OA\Post(
+     *     path="/api/allizo/carts",
+     *     summary="Create a new cart",
+     *     tags={"Carts"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"user_id"},
+     *             @OA\Property(property="user_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Cart created"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     */
         
     }
 
@@ -84,6 +113,21 @@ class CartController extends Controller
     /**
      * Display the specified resource.
      */
+    /**
+     * @OA\Get(
+     *     path="/api/allizo/carts/{id}",
+     *     summary="Get a specific cart",
+     *     tags={"Carts"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Cart retrieved"),
+     *     @OA\Response(response=404, description="Cart not found")
+     * )
+     */
     public function show(string $id)
     {
         try
@@ -112,6 +156,26 @@ class CartController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * /**
+     * @OA\Put(
+     *     path="/api/allizo/carts/{id}",
+     *     summary="Update a cart",
+     *     tags={"Carts"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user_id", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Cart updated"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function update(Request $request,$id)
     {
@@ -143,6 +207,21 @@ class CartController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * 
+     *  /**
+     * @OA\Delete(
+     *     path="/api/allizo/carts/{id}",
+     *     summary="Delete a cart",
+     *     tags={"Carts"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Cart deleted"),
+     *     @OA\Response(response=404, description="Cart not found")
+     * )
      */
     public function destroy(string $id)
     {
@@ -162,6 +241,28 @@ class CartController extends Controller
         }
 
     }
+    /**
+     * @OA\Post(
+     *     path="/api/allizo/carts/{cartId}/service",
+     *     summary="Add a service to a cart",
+     *     tags={"Carts"},
+     *     @OA\Parameter(
+     *         name="cartId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"service_id"},
+     *             @OA\Property(property="service_id", type="integer", example=3)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Service added"),
+     *     @OA\Response(response=404, description="Cart or service not found")
+     * )
+     */
 
     public function addToCart(Request $request , $cartId)
     {
@@ -199,6 +300,28 @@ class CartController extends Controller
         throw new CustomeExceptions($e->getMessage() , 500);
         }
     }
+     /**
+     * @OA\Delete(
+     *     path="/api/allizo/carts/{cartId}/service",
+     *     summary="Remove a service from a cart",
+     *     tags={"Carts"},
+     *     @OA\Parameter(
+     *         name="cartId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"service_id"},
+     *             @OA\Property(property="service_id", type="integer", example=3)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Service removed"),
+     *     @OA\Response(response=404, description="Cart or service not found")
+     * )
+     */
     public function removeService(Request $request , $cartId)
     {
         try
@@ -226,5 +349,6 @@ class CartController extends Controller
                 throw new CustomeExceptions($e->getMessage() , 500);
         }
     }
+    
         
 }
