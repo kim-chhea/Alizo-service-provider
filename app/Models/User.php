@@ -17,7 +17,7 @@ class User extends Authenticatable
      * The attributes that are mass assignable.
      *
      * @var list<string>
-     */
+     */ 
     protected $fillable = [
         'name',
         'email',
@@ -28,11 +28,11 @@ class User extends Authenticatable
     //relatioship of the user
     public function role()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsToMany(Role::class);
     }
     public function location()
     {
-        return $this->belongsTo(Location::class);
+        return $this->hasOne(Location::class);
     }
     public function review()
     {

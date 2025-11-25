@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
     {
        $this->call([
            RoleSeeder::class,
-           LocationSeeder::class,
            UserSeeder::class,
+           LocationSeeder::class,
            CategorieSeeder::class,
            ServiceSeeder::class,
            BookingSeeder::class,
@@ -29,11 +29,12 @@ class DatabaseSeeder extends Seeder
            PaymentSeeder::class,
            WishlistSeeder::class,
            OrderSeeder::class,
-          OrderServiceSeeder::class,
-          serviceCategoriesSeeder::class,
-          SeedersBookingServiceSeeder::class,
-          CartServiceSeeder::class,
-          WishlistServiceSeeder::class
+           OrderServiceSeeder::class,
+           serviceCategoriesSeeder::class,
+           SeedersBookingServiceSeeder::class,
+           CartServiceSeeder::class,
+           WishlistServiceSeeder::class,
+           UserRoleSeeder::class,
 
        ]);
     }

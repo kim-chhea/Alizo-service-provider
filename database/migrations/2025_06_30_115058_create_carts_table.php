@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
+            $table->string('status')->default('active');
             $table->foreign('user_id')->references('id')->on('users');
             // $table->integer('total');
             $table->timestamps();
