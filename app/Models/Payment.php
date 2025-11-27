@@ -6,14 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class payment extends Model
 {
-    // 
-    protected $fillable = ['booking_id','price','payment_method','transaction_id','status'];
+    //
+    protected $fillable = [
+        'order_id',
+        'booking_id',
+        'transaction_id',
+        'discount_amount',
+        'amount',
+        'currency',
+        'payment_method',
+        'status',
+    ];
+
     public function booking()
     {
         return $this->belongsTo(booking::class);
     }
+
     public function order()
     {
-        return $this->hasOne(Order::class);
+        return $this->belongsTo(Order::class);
     }
 }

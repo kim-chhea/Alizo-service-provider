@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreign('service_id')->references('id')->on('services')->cascadeOnUpdate();
             $table->string('comment');
             $table->tinyInteger('rating');
-            // $table->string('comment');
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\serviceCategories;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class serviceCategoriesSeeder extends Seeder
 {
@@ -27,8 +28,14 @@ class serviceCategoriesSeeder extends Seeder
             ['category_id' => 5, 'service_id' => 10],
         ];
 
+        // Insert directly into table to avoid missing model fillable
         foreach ($serviceCategories as $item) {
-            serviceCategories::create($item);
+            DB::table('service_categories')->insert([
+                'category_id' => $item['category_id'],
+                'service_id' => $item['service_id'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
     }
 }

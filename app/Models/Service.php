@@ -8,9 +8,9 @@ class Service extends Model
 {
     //
     protected $fillable = ['title' ,'description', 'price','image'];
-    public function order()
+    public function orders()
     {
-        return $this->belongsToMany(Service::class , 'order_services')->withTimestamps();
+        return $this->belongsToMany(Order::class , 'order_services')->withTimestamps();
     }
     public function categories()
     {
@@ -18,19 +18,19 @@ class Service extends Model
     }
     public function wishlists()
     {
-        return $this->belongsToMany(wishlist::class, 'wishlist_services');
+        return $this->belongsToMany(Wishlist::class, 'wishlist_services');
     }
     
-    public function booking()
+    public function bookings()
     {
-        return $this->belongsToMany(booking::class,'booking_services')->withTimestamps()->withPivot(['booking_date', 'time_slot', 'status']);
+        return $this->belongsToMany(booking::class,'booking_items')->withTimestamps()->withPivot(['booking_date', 'time_slot', 'status']);
 
     }
     public function carts()
     {
-        return $this->belongsToMany(cart::class,'cart_services')->withTimestamps()->withPivot('quantity');
+        return $this->belongsToMany(cart::class,'cart_items')->withTimestamps()->withPivot('quantity');
     }
-    public function review()
+    public function reviews()
     {
         return $this->hasMany(review::class);
     }

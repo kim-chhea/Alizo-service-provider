@@ -48,7 +48,7 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $user = User::with(['location:id,address,city,postal_code','role:id,name'])->get(['id','name','email','location_id', 'role_id']);
+            $user = User::with(['location','roles'])->first();
             if(!$user) {
                 return response()->json([
                    'message' => 'No users found.',
@@ -143,9 +143,7 @@ class UserController extends Controller
     public function show(string $id)
     {
         try {
-            $user = User::with(['location:id,address,city,postal_code','role:id,name'])
-                        ->select(['id','name','email','location_id', 'role_id'])
-                        ->findOrFail($id);
+            $user = User::with(['location','roles'])->findOrFail($id);
 
             return response()->json([
                 'message' => 'User retrieved successfully.',
@@ -246,8 +244,7 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         try {
-            $user = User::findOrFail($id);
-            $user->delete();
+            $user = User::findOrFail($id)->delete();
             return response()->json([
                 'message' => 'User deleted successfully.',
                 'status' => 200,

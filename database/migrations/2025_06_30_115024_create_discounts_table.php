@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->string('code')->unique();
             $table->string('descriptions')->nullable();
             $table->integer('percentage');
+            $table->longText('condition')->nullable();;
             $table->timestamps();
         });
     }

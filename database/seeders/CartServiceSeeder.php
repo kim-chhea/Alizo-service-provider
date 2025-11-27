@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\cartService;
+use App\Models\Service;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CartServiceSeeder extends Seeder
 {
@@ -28,7 +30,16 @@ class CartServiceSeeder extends Seeder
         ];
 
         foreach ($cartServices as $item) {
-            cartService::create($item);
+            $service = Service::find($item['service_id']);
+            $total = ($service ? $service->price : 0) * ($item['quantity'] ?? 1);
+            DB::table('cart_items')->insert([
+                'cart_id' => $item['cart_id'],
+                'service_id' => $item['service_id'],
+                'quantity' => $item['quantity'] ?? 1,
+                'total_price' => $total,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
     }
 }

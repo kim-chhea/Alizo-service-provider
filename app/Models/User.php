@@ -20,21 +20,23 @@ class User extends Authenticatable
      */ 
     protected $fillable = [
         'name',
+        'gender',
+        'first_name',
+        'sure_name',
+        'work_position',
         'email',
         'password',
-        'role_id',
-        'location_id',
     ];
     //relatioship of the user
-    public function role()
+    public function roles()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class,'user_role')->withTimestamps();
     }
     public function location()
     {
         return $this->hasOne(Location::class);
     }
-    public function review()
+    public function reviews()
     {
         return $this->hasMany(review::class);
     }
@@ -45,7 +47,7 @@ class User extends Authenticatable
     {
     return $this->hasOne(Wishlist::class);
     }
-    public function booking()
+    public function bookings()
     {
         return $this->hasMany(booking::class);
     }

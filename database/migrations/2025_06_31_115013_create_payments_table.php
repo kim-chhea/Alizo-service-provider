@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('booking_id');
-            $table->foreign('booking_id')->references('id')->on('bookings')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->decimal('price', 10,2);
-            $table->enum('status', ['pending', 'paid', 'failed','faild'])->default('pending');
+            $table->foreignId('order_id')->constrained('orders')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('booking_id')->constrained('bookings')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('transaction_id');
+            $table->integer('discount_amount')->nullable();
+            $table->decimal('amount', 10,2);
+            $table->string('currency')->default('USD');
             $table->string('payment_method')->nullable();
-            $table->string('transaction_id')->nullable(); 
+            $table->enum('status', ['pending', 'paid', 'failed'])->default('pending');
             $table->timestamps();
         });
     }

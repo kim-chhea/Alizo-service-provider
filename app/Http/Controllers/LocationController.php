@@ -33,7 +33,7 @@ class LocationController extends Controller
     public function index()
     {
         try {
-            $location = Location::get();
+            $location = Location::with('user' ,'user.roles')->get();
             if(!$location) {
                 return response()->json([
                    'message' => 'No locations found.',
@@ -121,7 +121,7 @@ class LocationController extends Controller
     public function show(string $id)
     {
         try {
-            $location = Location::findOrFail($id);
+            $location = Location::with('user' ,'user.roles')->findOrFail($id);
             return response()->json([
                 'message' => 'Locations retrieved successfully.',
                 'status' => 200,

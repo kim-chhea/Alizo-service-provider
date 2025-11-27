@@ -19,15 +19,20 @@ class BookingServiceSeeder extends Seeder
             ['booking_id' => 9, 'service_id' => 10, 'status' => 'cancelled', 'booking_date' => '2025-07-23', 'time_slot' => '15:30:00'],
         ];
 
+        // Insert into the actual migration table `booking_items` and compute total_price
         foreach ($bookingServices as $bookingService) {
-            DB::table('booking_services')->insert([
-                'booking_id'   => $bookingService['booking_id'],
-                'service_id'   => $bookingService['service_id'],
-                'status'       => $bookingService['status'],
-                'booking_date' => $bookingService['booking_date'],
-                'time_slot'    => $bookingService['time_slot'],
-                'created_at'   => now(),
-                'updated_at'   => now(),
+            $service = DB::table('services')->where('id', $bookingService['service_id'])->first();
+            $price = $service ? $service->price : 0;
+            DB::table('booking_items')->insert([
+                'booking_id' => $bookingService['booking_id'],
+                'service_id' => $bookingService['service_id'],
+                'discount_id' => null,
+                'quantity' => 1,
+                'total_price' => $price,
+                'note' => null,
+                'status' => $bookingService['status'] ?? 'pending',
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
     }

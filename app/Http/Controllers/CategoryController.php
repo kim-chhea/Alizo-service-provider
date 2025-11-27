@@ -33,7 +33,7 @@ class CategoryController extends Controller
     public function index()
     {
         try {
-            $Category = Category::orderBy('id','asc')->with(['service'])->get(['id','name']);
+            $Category = Category::orderBy('id','asc')->with(['services'])->get(['id','name']);
             if(!$Category) {
                 return response()->json([
                    'message' => 'No categories found.',
@@ -117,7 +117,7 @@ class CategoryController extends Controller
     public function show(string $id)
     {
         try {
-            $Category = Category::with(['service'])->select(['id','name'])->findOrFail($id);
+            $Category = Category::with(['services'])->select(['id','name'])->findOrFail($id);
             return response()->json([
                 'message' => 'Category retrieved successfully.',
                 'status' => 200,

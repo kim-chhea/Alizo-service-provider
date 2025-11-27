@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreign('order_id')->references('id')->on('orders')->cascadeOnUpdate();
             $table->unsignedBigInteger('service_id');
             $table->foreign('service_id')->references('id')->on('services')->cascadeOnUpdate();
+            $table->integer('total_amount');
             $table->timestamps();
         });
     }

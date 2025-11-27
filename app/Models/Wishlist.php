@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class wishlist extends Model
 {
     //
-    protected $fillable = ['user_id'];
+    protected $fillable = ['user_id','name'];
     public function services()
     {
         return $this->belongsToMany(Service::class, 'wishlist_services')->withTimestamps();

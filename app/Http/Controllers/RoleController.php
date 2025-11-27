@@ -35,7 +35,7 @@ class RoleController extends Controller
     public function index()
     {
         try {
-            $role = Role::get(['id','name']);
+            $role = Role::with('users')->get();
             if(!$role)
             {
                 return response()->json([
@@ -125,7 +125,7 @@ class RoleController extends Controller
     public function show(string $id)
     {
         try {
-            $role = Role::findOrFail($id);
+            $role = Role::with('users')->findOrFail($id);
             return response()->json([
                 'message' => 'roles retrieved successfully.',
                 'status' => 200,

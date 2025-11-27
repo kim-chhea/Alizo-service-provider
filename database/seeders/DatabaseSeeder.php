@@ -2,13 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Location;
-use App\Models\User;
-use BookingServiceSeeder;
-use Database\Seeders\BookingServiceSeeder as SeedersBookingServiceSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Whoops\Run;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,25 +12,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-       $this->call([
-           RoleSeeder::class,
-           UserSeeder::class,
-           LocationSeeder::class,
-           CategorieSeeder::class,
-           ServiceSeeder::class,
-           BookingSeeder::class,
-           CartSeeder::class,
-           ReviewSeeder::class,
-           PaymentSeeder::class,
-           WishlistSeeder::class,
-           OrderSeeder::class,
-           OrderServiceSeeder::class,
-           serviceCategoriesSeeder::class,
-           SeedersBookingServiceSeeder::class,
-           CartServiceSeeder::class,
-           WishlistServiceSeeder::class,
-           UserRoleSeeder::class,
-
-       ]);
+        $this->call([
+            RoleSeeder::class,
+            UserSeeder::class,
+            LocationSeeder::class,
+            UserRoleSeeder::class,
+            CategorieSeeder::class,
+            ServiceSeeder::class,
+            serviceCategoriesSeeder::class,
+            BookingSeeder::class,
+            BookingServiceSeeder::class,
+            CartSeeder::class,
+            CartServiceSeeder::class,
+            WishlistSeeder::class,
+            WishlistServiceSeeder::class,
+            OrderSeeder::class,
+            PaymentSeeder::class,
+            OrderServiceSeeder::class,
+            ReviewSeeder::class,
+        ]);
     }
 }
