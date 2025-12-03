@@ -12,9 +12,8 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_id' => 1,
-            'booking_id' => null,
-            'transaction_id' => 'TXN-' . strtoupper($this->faker->bothify('????######')),
+            'booking_id' => 1,
+            'transaction_uid' => 'TXN-' . strtoupper($this->faker->bothify('????######')),
             'discount_amount' => null,
             'amount' => $this->faker->randomFloat(2, 10, 500),
             'currency' => 'USD',

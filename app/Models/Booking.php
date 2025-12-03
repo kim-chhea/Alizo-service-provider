@@ -9,15 +9,19 @@ use Illuminate\Http\Testing\FileFactory;
 class booking extends Model
 {
     // 
-    protected $fillable = ['user_id'];
+    protected $fillable = ['user_id', 'note', 'scheduled', 'is_confirmed'];
+    protected $hidden = ['created_at', 'updated_at'];
+    
     public function services()
     {
         return $this->belongsToMany(Service::class,'booking_items')->withTimestamps()->withPivot(['booking_date', 'time_slot', 'status']);
     }
+    
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+    
     public function payment()
     {
         return $this->hasOne(payment::class);

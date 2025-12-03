@@ -22,13 +22,10 @@ class DatabaseSeeder extends Seeder
             serviceCategoriesSeeder::class,
             BookingSeeder::class,
             BookingServiceSeeder::class,
-            CartSeeder::class,
-            CartServiceSeeder::class,
-            WishlistSeeder::class,
-            WishlistServiceSeeder::class,
-            OrderSeeder::class,
             PaymentSeeder::class,
-            OrderServiceSeeder::class,
+            BookingHistorySeeder::class,
+              WishlistSeeder::class,
+            WishlistServiceSeeder::class,
             ReviewSeeder::class,
         ]);
     }

@@ -4,18 +4,19 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class OrderResource extends JsonResource
+class BookingHistoryResource extends JsonResource
 {
     public function toArray($request): array
     {
         return [
             'id' => $this->id,
+            'booking_id' => $this->booking_id,
             'user_id' => $this->user_id,
-            'note' => $this->note,
+            'transaction_uid' => $this->transaction_uid,
             'status' => $this->status,
-            'services' => ServiceResource::collection($this->whenLoaded('services')),
-            'payment' => new PaymentResource($this->whenLoaded('payment')),
+            'notes' => $this->notes,
             'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

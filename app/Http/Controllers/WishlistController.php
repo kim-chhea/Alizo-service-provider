@@ -33,7 +33,7 @@ class WishlistController extends Controller
     public function index()
     {
         try {
-            $wishlist = wishlist::with(['user:id,name', 'services:id,title,price,description'])->get(['id', 'user_id']);
+            $wishlist = wishlist::with(['user:id,name', 'services'])->get();
             if (!$wishlist) {
                 return response()->json([
                     'message' => 'No wishlists found.',

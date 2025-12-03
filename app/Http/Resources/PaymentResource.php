@@ -10,14 +10,14 @@ class PaymentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'order_id' => $this->order_id,
             'booking_id' => $this->booking_id,
-            'transaction_id' => $this->transaction_id,
+            'transaction_uid' => $this->transaction_uid,
             'discount_amount' => $this->discount_amount,
             'amount' => $this->amount,
             'currency' => $this->currency,
             'payment_method' => $this->payment_method,
             'status' => $this->status,
+            'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
         ];
     }

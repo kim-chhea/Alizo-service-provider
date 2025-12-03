@@ -8,6 +8,7 @@ class Order extends Model
 {
     //
     protected $fillable = ['user_id','note','status'];
+    protected $hidden = ['created_at', 'updated_at'];
     public function services()
     {
         return $this->belongsToMany(Service::class , 'order_services')->withTimestamps();

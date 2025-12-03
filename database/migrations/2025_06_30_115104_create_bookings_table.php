@@ -16,8 +16,11 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnUpdate();
             $table->string('note')->nullable();
+            $table->decimal('sub_total', 8, 2)->default(0);
+            $table->decimal('discount_amount', 8, 2)->default(0);
+            $table->decimal('tax', 8, 2 )->default(0);
             $table->dateTime('scheduled');
-            $table->boolean('is_confirmed')->default(true);
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }

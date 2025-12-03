@@ -45,7 +45,7 @@ class ServiceController extends Controller
             return response()->json([
                 'message' => 'services retrieved successfully.',
                 'status' => 200,
-                'data' => $service,
+                'data' => $service->load('categories')->except(['created_at', 'updated_at']),
             ]);
         }
         catch(Exception $e) {
@@ -53,7 +53,7 @@ class ServiceController extends Controller
         }
     }
 
-    /**
+    /** 
      * @OA\Post(
      *     path="/api/allizo/services",
      *     summary="Create a new service",
@@ -157,7 +157,7 @@ class ServiceController extends Controller
             return response()->json([
                 'message' => 'services retrieved successfully.',
                 'status' => 200,
-                'data' => $service,
+                'data' => $service->load('categories'),
             ]);
         }
         catch(Exception $e) {

@@ -3,20 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class payment extends Model
+class BookingHistory extends Model
 {
-    use SoftDeletes;
-
+    protected $table = 'booking_history';
+    
     protected $fillable = [
         'booking_id',
+        'user_id',
         'transaction_uid',
-        'discount_amount',
-        'amount',
-        'currency',
-        'payment_method',
         'status',
+        'notes',
     ];
     
     protected $hidden = ['created_at', 'updated_at'];
@@ -24,5 +21,10 @@ class payment extends Model
     public function booking()
     {
         return $this->belongsTo(booking::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

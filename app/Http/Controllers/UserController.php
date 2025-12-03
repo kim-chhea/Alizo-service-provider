@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CustomeExceptions;
+use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -37,8 +39,10 @@ class UserController extends Controller
      *                     @OA\Property(property="id", type="integer"),
      *                     @OA\Property(property="name", type="string"),
      *                     @OA\Property(property="email", type="string"),
-     *                     @OA\Property(property="location_id", type="integer", nullable=true),
-     *                     @OA\Property(property="role_id", type="integer")
+     *                     @OA\Property(property="gender", type="string", nullable=true),
+     *                     @OA\Property(property="first_name", type="string", nullable=true),
+     *                     @OA\Property(property="sure_name", type="string", nullable=true),
+     *                     @OA\Property(property="work_position", type="string", nullable=true)
      *                 )
      *             )
      *         )
@@ -48,8 +52,8 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $user = User::with(['location','roles'])->first();
-            if(!$user) {
+            $users = User::with(['location','roles'])->get();
+            if($users->isEmpty()) {
                 return response()->json([
                    'message' => 'No users found.',
                    'status' => 404,
@@ -58,7 +62,7 @@ class UserController extends Controller
             return response()->json([
                 'message' => 'Users retrieved successfully.',
                 'status' => 200,
-                'data' => $user,
+                'data' => $users,
             ]);
         } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -73,12 +77,14 @@ class UserController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name","email","password","role_id"},
+     *             required={"name","email","password"},
      *             @OA\Property(property="name", type="string", maxLength=20),
      *             @OA\Property(property="email", type="string", format="email"),
      *             @OA\Property(property="password", type="string", minLength=6, maxLength=16),
-     *             @OA\Property(property="location_id", type="integer", nullable=true),
-     *             @OA\Property(property="role_id", type="integer")
+     *             @OA\Property(property="gender", type="string", nullable=true),
+     *             @OA\Property(property="first_name", type="string", nullable=true),
+     *             @OA\Property(property="sure_name", type="string", nullable=true),
+     *             @OA\Property(property="work_position", type="string", nullable=true)
      *         )
      *     ),
      *     @OA\Response(
@@ -98,22 +104,33 @@ class UserController extends Controller
                 "name" => "required|string|max:20",
                 "email"=> "required|email|unique:users,email",
                 "password" => "required|string|min:6|max:16",
-                "location_id" => "nullable|integer",
-                "role_id" => 'required|integer'
+                "gender" => "nullable|string",
+                "first_name" => "nullable|string",
+                "sure_name" => "nullable|string",
+                "work_position" => "nullable|string"
             ]);
             $ValidatedData['password'] = Hash::make($ValidatedData['password']);
             $user = User::create($ValidatedData);
+            if($user)
+            {
+                    $user->roles()->attach(1);
+                    return response()->json([
+                        'message' => 'User registered successfully.',
+                        'status' => 201,
+                        'data' => $user->load('roles'),
+            ]);
 
-            if(!$user) {
+                
+            }
+            else 
+            {
                 throw new CustomeExceptions('User creation failed due to an unexpected error.', 500);
             }
 
-            return response()->json([
-                'message' => 'User registered successfully.',
-                'status' => 201,
-                'data' => $user,
-            ]);
+
+        
         } catch(Exception $e) {
+            DB::rollBack();
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
@@ -173,8 +190,10 @@ class UserController extends Controller
      *             @OA\Property(property="name", type="string", maxLength=20),
      *             @OA\Property(property="email", type="string", format="email"),
      *             @OA\Property(property="password", type="string", minLength=6, maxLength=16),
-     *             @OA\Property(property="location_id", type="integer", nullable=true),
-     *             @OA\Property(property="role_id", type="integer")
+     *             @OA\Property(property="gender", type="string", nullable=true),
+     *             @OA\Property(property="first_name", type="string", nullable=true),
+     *             @OA\Property(property="sure_name", type="string", nullable=true),
+     *             @OA\Property(property="work_position", type="string", nullable=true)
      *         )
      *     ),
      *     @OA\Response(
@@ -194,9 +213,14 @@ class UserController extends Controller
                 "name" => "sometimes|string|max:20",
                 "email"=> "sometimes|email|unique:users,email,".$id,
                 "password" => "sometimes|string|min:6|max:16",
-                "location_id" => "sometimes|nullable|integer",
-                "role_id" => 'sometimes|integer'
+                "gender" => "sometimes|nullable|string",
+                "first_name" => "sometimes|nullable|string",
+                "sure_name" => "sometimes|nullable|string",
+                "work_position" => "sometimes|nullable|string",
+                "roles" => "sometimes|array",
+                "roles.*" => "integer|exists:roles,id"
             ]);
+            
 
             if(isset($ValidatedData['password'])) {
                 $ValidatedData['password'] = Hash::make($ValidatedData['password']);
@@ -204,6 +228,9 @@ class UserController extends Controller
 
             $user = User::findOrFail($id);
             $updatedSuccess = $user->update($ValidatedData);
+            if(isset($ValidatedData['roles'])) {
+                $user->roles()->sync($ValidatedData['roles']);
+            }
 
             if(!$updatedSuccess) {
                 throw new CustomeExceptions('User updation failed due to an unexpected error.', 500);
@@ -212,7 +239,7 @@ class UserController extends Controller
             return response()->json([
                 'message' => 'User updated successfully.',
                 'status' => 200,
-                'data' => $user,
+                'data' => $user->load('roles'),
             ]);
         } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -252,5 +279,59 @@ class UserController extends Controller
         } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
+    }
+
+    public function CreateUsersFullinfo(Request $request)
+    {
+        //
+        try
+        {
+                $validateData = $request->validate([
+                    "name" => "required|string|max:20",
+                    "email"=> "required|email|unique:users,email,",
+                    "password" => "required|string|min:6|max:16",
+                    "gender" => "required|nullable|string",
+                    "first_name" => "required|nullable|string",
+                    "sure_name" => "required|nullable|string",
+                    "work_position" => "required|nullable|string",
+                    "roles" => "required|array",
+                    "roles.*" => "integer|exists:roles,id",
+                    "location" => "required|array",
+                    "location.*.address" => "string",
+                    "location.*.city" => "string",
+                    "location.*.country" => "string",
+                    "location.*.postal_code" => "string",
+                    "location.*.country_code" => "string",
+
+            ]);
+            $user = User::create($validateData);
+            if($user)
+            {
+                    if(isset($validateData['roles'])) {
+                        $user->roles()->sync($validateData['roles']);
+                    }
+                    if(isset($validateData['location'])) {
+                        foreach($validateData['location'] as $loc) {
+                            $user->location()->create($loc);
+                        }
+                    }
+                    return response()->json([
+                        'message' => 'User created successfully.',
+                        'status' => 201,
+                        'data' => $user->load('roles','location'),
+            ]);
+
+                
+            }
+            else 
+            {
+                throw new CustomeExceptions('User creation failed due to an unexpected error.', 500);
+            }
+            }
+        catch(Exception $e)
+        {
+            throw new CustomeExceptions($e->getMessage(), 500);
+        }
+        
     }
 }

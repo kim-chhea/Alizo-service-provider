@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payments', function (Blueprint $table) {
+        Schema::create('booking_history', function (Blueprint $table) {
             $table->id();
             $table->foreignId('booking_id')->constrained('bookings')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('transaction_uid');
-            $table->integer('discount_amount')->nullable();
-            $table->decimal('amount', 10,2);
-            $table->string('currency')->default('USD');
-            $table->string('payment_method')->nullable();
-            $table->enum('status', ['pending', 'paid', 'failed'])->default('pending');
-            $table->softDeletes();
+            $table->string('status');
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payments');
+        Schema::dropIfExists('booking_history');
     }
 };

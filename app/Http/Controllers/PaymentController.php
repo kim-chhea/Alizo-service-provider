@@ -25,7 +25,7 @@ class PaymentController extends Controller
         try
         {
 
-            $payment = payment::with(['booking:id,user_id','booking.services:title,description,price'])->get(['id','booking_id' ,'price' ,'status','payment_method', 'transaction_id']);
+            $payment = payment::with(['booking:id,user_id','booking.services:title,description,price'])->get(['id','booking_id','amount','discount_amount','currency','status','payment_method','transaction_uid']);
             if(!$payment)
             {
                 return response()->json([
@@ -63,10 +63,13 @@ class PaymentController extends Controller
         try
         {
           $ValidatedData = $request->validate([
-            "booking_id" => "required|integer|",
-            "price" => "required|integer|min:1",
+            "booking_id" => "required|integer",
+            "amount" => "required|numeric|min:0",
+            "discount_amount" => "nullable|numeric|min:0",
+            "currency" => "nullable|string|max:3",
             "payment_method"=> "required|string",
-            "transaction_id" => "required|string"
+            "transaction_uid" => "required|string|unique:payments,transaction_uid",
+            "status" => "nullable|string"
           ]);
           //check if that user_id alrady have payment or not
          $payment = payment::create($ValidatedData);
@@ -95,7 +98,7 @@ class PaymentController extends Controller
         try
         {
 
-            $payment = payment::with(['booking:id,user_id','booking.services:title,description,price'])->select(['booking:id,user_id','booking.services:title,description,price'])->select(['id','booking_id' ,'price' ,'status','payment_method', 'transaction_id'])->findOrFail($id);
+            $payment = payment::with(['booking:id,user_id','booking.services:title,description,price'])->select(['id','booking_id','amount','discount_amount','currency','status','payment_method','transaction_uid'])->findOrFail($id);
             return response()->json([
                 'message' => 'payments retrieved successfully.',
                 'status' => 200,
@@ -124,10 +127,13 @@ class PaymentController extends Controller
         try
         {
             $ValidatedData = $request->validate([
-                "booking_id" => "sometimes|integer|",
-                "price" => "sometimes|integer|min:1",
+                "booking_id" => "sometimes|integer",
+                "amount" => "sometimes|numeric|min:0",
+                "discount_amount" => "sometimes|numeric|min:0",
+                "currency" => "sometimes|string|max:3",
                 "payment_method"=> "sometimes|string",
-                "transaction_id" => "sometimes|string"
+                "transaction_uid" => "sometimes|string|unique:payments,transaction_uid," . $id,
+                "status" => "sometimes|string"
               ]);
 
               $payment = payment::findOrFail($id);

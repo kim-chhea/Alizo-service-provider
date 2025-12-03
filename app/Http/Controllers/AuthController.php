@@ -56,9 +56,10 @@ class AuthController extends Controller
             "name" => "required|string",
             "email" => "required|email|unique:users,email",
             "password" => "required|string",
-            "role_id" => "required",
-            "location_id" => "nullable"
-
+            "gender" => "nullable|string",
+            "first_name" => "nullable|string",
+            "sure_name" => "nullable|string",
+            "work_position" => "nullable|string"
           ]);
           // hash password
           $ValidatedUser['password'] = Hash::make($ValidatedUser['password']);

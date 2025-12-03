@@ -226,4 +226,28 @@ class RoleController extends Controller
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
+    public function assignRoleToUser(Request $request)
+    {
+        try {
+            $ValidatedData = $request->validate([
+                "user_id" => "required|integer|exists:users,id",
+                "role_id" => "required|integer|exists:roles,id",
+            ]);
+
+            $user = User::findOrFail($ValidatedData['user_id']);
+            $role = Role::findOrFail($ValidatedData['role_id']);
+
+            // Attach role to user
+            $user->roles()->attach($role->id);
+
+            return response()->json([
+                'message' => 'Role assigned to user successfully.',
+                'status' => 200,
+            ]);
+        }
+        catch(Exception $e) 
+        {
+            throw new CustomeExceptions($e->getMessage(), 500);
+        }
+    }
 }
