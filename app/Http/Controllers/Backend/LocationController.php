@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
+use App\Http\Resources\LocationResource;
 use App\Models\Location;
 use Exception;
 use Illuminate\Http\Request;
@@ -33,7 +35,7 @@ class LocationController extends Controller
     public function index()
     {
         try {
-            $location = Location::with('user' ,'user.roles')->get();
+            $location = Location::get();
             if(!$location) {
                 return response()->json([
                    'message' => 'No locations found.',
@@ -43,7 +45,7 @@ class LocationController extends Controller
             return response()->json([
                 'message' => 'Locations retrieved successfully.',
                 'status' => 200,
-                'data' => $location,
+                'data' => LocationResource::collection($location),
             ]);
         } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -80,7 +82,8 @@ class LocationController extends Controller
             $ValidatedData = $request->validate([
                 "address" => "required|string|unique:locations,address",
                 "city" => "required|string",
-                "postal_code" => "required|integer"
+                "postal_code" => "required|integer",
+                'country_code' => 'required|interger',
             ]);
             $location = Location::create($ValidatedData);
             if(!$location) {
@@ -125,7 +128,7 @@ class LocationController extends Controller
             return response()->json([
                 'message' => 'Locations retrieved successfully.',
                 'status' => 200,
-                'data' => $location,
+                'data' => new LocationResource($location),
             ]);
         } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -167,7 +170,8 @@ class LocationController extends Controller
             $ValidatedData = $request->validate([
                 "address" => "sometimes|string",
                 "city" => "sometimes|string",
-                "postal_code" => "sometimes|string"
+                "postal_code" => "sometimes|integer",
+                'country_code' => 'sometimes|integer',
             ]);
             $location = Location::findOrFail($id);
             $updatedSuccess = $location->update($ValidatedData);

@@ -1,19 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
 use App\Models\booking;
 use App\Models\payment;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
-use PhpParser\Node\Expr\FuncCall;
-
-use function PHPUnit\Framework\isEmpty;
-
-// use Illuminate\Support\Facades\Hash;
 
 class PaymentController extends Controller
 {
@@ -24,9 +18,10 @@ class PaymentController extends Controller
     {
         try
         {
-
-            $payment = payment::with(['booking:id,user_id','booking.services:title,description,price'])->get(['id','booking_id','amount','discount_amount','currency','status','payment_method','transaction_uid']);
-            if(!$payment)
+            $payments = payment::with(['booking:id,user_id','booking.services:title,description,price'])
+                ->get(['id','booking_id','amount','discount_amount','currency','status','payment_method','transaction_uid']);
+            
+            if($payments->isEmpty())
             {
                 return response()->json([
                    'message' => 'No payments found.',
@@ -34,9 +29,9 @@ class PaymentController extends Controller
                 ]);
             }
             return response()->json([
-                'message' => 'payments retrieved successfully.',
+                'message' => 'Payments retrieved successfully.',
                 'status' => 200,
-                'data' => $payment,
+                'data' => $payments,
             ]);
         }
         catch(Exception $e)
@@ -97,8 +92,8 @@ class PaymentController extends Controller
     {
         try
         {
-
-            $payment = payment::with(['booking:id,user_id','booking.services:title,description,price'])->select(['id','booking_id','amount','discount_amount','currency','status','payment_method','transaction_uid'])->findOrFail($id);
+            $payment = payment::with(['booking:id,user_id','booking.services:title,description,price'])
+                ->findOrFail($id);
             return response()->json([
                 'message' => 'payments retrieved successfully.',
                 'status' => 200,

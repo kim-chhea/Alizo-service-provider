@@ -1,11 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Models\Service;
+use App\Models\serviceCategories;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -43,7 +48,7 @@ class CategoryController extends Controller
             return response()->json([
                 'message' => 'Categories retrieved successfully.',
                 'status' => 200,
-                'data' => $Category,
+                'data' => CategoryResource::collection($Category),
             ]);
         } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -121,7 +126,7 @@ class CategoryController extends Controller
             return response()->json([
                 'message' => 'Category retrieved successfully.',
                 'status' => 200,
-                'data' => $Category,
+                'data' => new CategoryResource($Category),
             ]);
         } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -211,4 +216,58 @@ class CategoryController extends Controller
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
+    public function CreateCategoryWithServices(Request $request)
+    {
+
+
+        try 
+        {
+            $validated = $request->validate([
+            "name" => "required|string|unique:categories,name",
+            "services" => "sometimes|array",
+            "services.*.title" => "required_with:services|string",
+            "services.*.description" => "required_with:services|string",
+            "services.*.price" => "required_with:services|integer",
+            "services.*.image" => "sometimes|file|mimes:jpeg,png,jpg|max:2048",
+            ]);
+
+            DB::beginTransaction();
+            // Create category
+            $category = Category::create([
+                'name' => $validated['name'],
+            ]);
+
+            // Create services if provided
+            if (!empty($validated['services'])) {
+                foreach ($validated['services'] as $serviceData) {
+                    // Store image if exists
+                    $imagePath = null;
+                    if (isset($serviceData['image'])) {
+                        $imagePath = $serviceData['image']->store('services', 'public');
+                    }
+                    // Create service
+                    $service = Service::create([
+                        'title' => $serviceData['title'],
+                        'description' => $serviceData['description'],
+                        'price' => $serviceData['price'],
+                        'image' => $imagePath,
+                    ]);
+                    // Attach service to category
+                    $category->services()->attach($service->id);
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'message' => 'Category and services created successfully.',
+                'status' => 201,
+                'data' => $category->load('services'),
+            ]);
+
+        } 
+        catch (Exception $e) 
+        {
+            DB::rollBack();
+            throw new CustomeExceptions($e->getMessage(), 500);
+        }
+   }
 }

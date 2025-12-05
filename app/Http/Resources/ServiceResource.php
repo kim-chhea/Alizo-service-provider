@@ -16,9 +16,9 @@ class ServiceResource extends JsonResource
             'image' => $this->image,
             'is_active' => $this->is_active,
             'categories' => CategoryResource::collection($this->whenLoaded('categories')),
-            'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            // 'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
+            // 'created_at' => $this->created_at,
+            // 'updated_at' => $this->updated_at,
         ];
     }
 }

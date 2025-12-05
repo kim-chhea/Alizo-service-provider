@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
+use App\Http\Resources\RoleResource;
 use App\Models\Role;
 use App\Models\User;
 use Exception;
@@ -46,7 +48,7 @@ class RoleController extends Controller
             return response()->json([
                 'message' => 'roles retrieved successfully.',
                 'status' => 200,
-                'data' => $role,
+                'data' => RoleResource::collection($role),
             ]);
         }
         catch(Exception $e) {
@@ -129,7 +131,7 @@ class RoleController extends Controller
             return response()->json([
                 'message' => 'roles retrieved successfully.',
                 'status' => 200,
-                'data' => $role,
+                'data' => new RoleResource($role),
             ]);
         }
         catch(Exception $e) {
@@ -181,7 +183,7 @@ class RoleController extends Controller
             return response()->json([
                 'message' => 'Role updated successfully.',
                 'status' => 200,
-                'data' => $role,
+                'data' => new RoleResource($role),
             ]);
         }
         catch(Exception $e) {
@@ -243,6 +245,10 @@ class RoleController extends Controller
             return response()->json([
                 'message' => 'Role assigned to user successfully.',
                 'status' => 200,
+                'data' => [
+                    'user' => $user,
+                    'role' => $role,
+                ],
             ]);
         }
         catch(Exception $e) 

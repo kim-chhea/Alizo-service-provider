@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
+use App\Http\Resources\WishlistResource;
 use App\Models\wishlist;
 use Exception;
 use Illuminate\Http\Request;
@@ -33,17 +35,18 @@ class WishlistController extends Controller
     public function index()
     {
         try {
-            $wishlist = wishlist::with(['user:id,name', 'services'])->get();
-            if (!$wishlist) {
+            $wishlists = wishlist::with(['user:id,name', 'services'])->get();
+            
+            if ($wishlists->isEmpty()) {
                 return response()->json([
                     'message' => 'No wishlists found.',
                     'status' => 404,
                 ]);
             }
             return response()->json([
-                'message' => 'Wishlist retrieved successfully.',
+                'message' => 'Wishlists retrieved successfully.',
                 'status' => 200,
-                'data' => $wishlist,
+                'data' => WishlistResource::collection($wishlists),
             ]);
         } catch (Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -117,11 +120,11 @@ class WishlistController extends Controller
     public function show(string $id)
     {
         try {
-            $wishlist = wishlist::with(['services:id,title,description,price','user:id,name,email'])->select(['id','user_id'])->findOrFail($id);
+            $wishlist = wishlist::with(['services'])->findOrFail($id);
             return response()->json([
                 'message' => 'Wishlist retrieved successfully.',
                 'status' => 200,
-                'data' => $wishlist,
+                'data' => new WishlistResource($wishlist),
             ]);
         } catch (Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -159,19 +162,30 @@ class WishlistController extends Controller
     {
         try {
             $ValidatedData = $request->validate([
-                "user_id" => "sometimes|integer|unique:wishlists,user_id,".$id
+                "user_id" => "sometimes|integer|unique:wishlists,user_id,".$id,
+                "services" => "sometimes|array",
+                "services.*" => "integer|exists:services,id"
+
             ]);
             $wishlist = wishlist::findOrFail($id);
-            $updatedSuccess = $wishlist->update($ValidatedData);
-            if (!$updatedSuccess) {
-                throw new CustomeExceptions('Wishlist updation failed due to an unexpected error.', 500);
-            }
+            foreach($ValidatedData['services'] as $service_id) 
+            {
+                if($wishlist->services()->where('service_id', $service_id)->exists()) 
+                    {
+                        $wishlist->services()->detach($service_id);
+                        continue;
+                    }
+
+                    $wishlist->services()->attach($service_id);
+                }
             return response()->json([
                 'message' => 'Wishlist updated successfully.',
                 'status' => 200,
-                'data' => $wishlist,
+                'data' => $wishlist->load('services'),
             ]);
-        } catch (Exception $e) {
+        } 
+        catch (Exception $e) 
+        {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }
@@ -242,25 +256,31 @@ class WishlistController extends Controller
      */
     public function addService(Request $request, $wishlistId)
     {
-        try {
+        try 
+        {
             $valideteData = $request->validate([
-                "service_id" => "required|integer",
+                "service_id" => "required|array|exists:services,id",
             ]);
             $wishlist = wishlist::findOrFail($wishlistId);
-            $service = $wishlist->services()->where('service_id', $valideteData['service_id'])->exists();
-            if ($service) {
-                return response()->json([
-                    'message' => 'The service already exists in that wishlist.',
-                    'status' => 400,
-                ]);
-            } else {
-                $wishlist->services()->attach($valideteData['service_id']);
+            foreach ($valideteData['service_id'] as $service_id)
+            {
+                $wishlist->services()->attach($service_id);
+                if($wishlist->services()->where('service_id', $service_id)->exists()) 
+                {
+                    return response()->json([
+                        'message' => 'Service already exists in this wishlist.',
+                        'status' => 400
+                    ]);
+
+                }
             }
             return response()->json([
                 'message' => 'Service added to wishlist successfully.',
                 'status' => 200
             ]);
-        } catch (Exception $e) {
+        } 
+        catch (Exception $e) 
+        {
             throw new CustomeExceptions($e->getMessage(), 500);
         }
     }

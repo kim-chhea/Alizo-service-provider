@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
+use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use Exception;
@@ -62,7 +64,7 @@ class UserController extends Controller
             return response()->json([
                 'message' => 'Users retrieved successfully.',
                 'status' => 200,
-                'data' => $users,
+                'data' => UserResource::collection($users),
             ]);
         } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -165,7 +167,7 @@ class UserController extends Controller
             return response()->json([
                 'message' => 'User retrieved successfully.',
                 'status' => 200,
-                'data' => $user,
+                'data' => new UserResource($user),
             ]);
         } catch(Exception $e) {
             throw new CustomeExceptions($e->getMessage(), 500);
@@ -288,12 +290,12 @@ class UserController extends Controller
         {
                 $validateData = $request->validate([
                     "name" => "required|string|max:20",
-                    "email"=> "required|email|unique:users,email,",
+                    "email"=> "required|email|unique:users,email",
                     "password" => "required|string|min:6|max:16",
-                    "gender" => "required|nullable|string",
-                    "first_name" => "required|nullable|string",
-                    "sure_name" => "required|nullable|string",
-                    "work_position" => "required|nullable|string",
+                    "gender" => "nullable|string",
+                    "first_name" => "nullable|string",
+                    "sure_name" => "nullable|string",
+                    "work_position" => "nullable|string",
                     "roles" => "required|array",
                     "roles.*" => "integer|exists:roles,id",
                     "location" => "required|array",
@@ -318,7 +320,7 @@ class UserController extends Controller
                     return response()->json([
                         'message' => 'User created successfully.',
                         'status' => 201,
-                        'data' => $user->load('roles','location'),
+                        'data' => new UserResource($user->load(['roles','location'])),
             ]);
 
                 

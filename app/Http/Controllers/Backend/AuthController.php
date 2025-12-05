@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
 use App\Models\User;
 use Exception;
@@ -55,15 +56,25 @@ class AuthController extends Controller
           $ValidatedUser = $request->validate([
             "name" => "required|string",
             "email" => "required|email|unique:users,email",
-            "password" => "required|string",
+            "password" => "required|string|min:6",
             "gender" => "nullable|string",
             "first_name" => "nullable|string",
             "sure_name" => "nullable|string",
             "work_position" => "nullable|string"
           ]);
+          
           // hash password
           $ValidatedUser['password'] = Hash::make($ValidatedUser['password']);
-          // creat user
+          
+          // Ensure nullable fields exist with null as default
+          $ValidatedUser = array_merge([
+              'gender' => null,
+              'first_name' => null,
+              'sure_name' => null,
+              'work_position' => null,
+          ], $ValidatedUser);
+          
+          // create user
           $user = User::create($ValidatedUser);
           if($user)
           {
@@ -86,22 +97,28 @@ class AuthController extends Controller
     
      try
      {
-         
          $user = $request->user('sanctum');
-        // get user object
+         
          if(!$user)
          {
-             throw new CustomeExceptions('Unauthentication' , 401);
+             throw new CustomeExceptions('Unauthenticated' , 401);
          }
+         
          $token = $user->currentAccessToken();
-         // access to current token in database (hashed token)
+         
          if($token)
          {
              $token->delete();
-             $user->delete();
-             return response()->json(['message' => 'Logged out successfully', "status" => 200]);
+             return response()->json([
+                 'message' => 'Logged out successfully', 
+                 'status' => 200
+             ]);
          }
-         return response()->json(['message' => 'No active token found.'], 400);
+         
+         return response()->json([
+             'message' => 'No active token found.',
+             'status' => 400
+         ]);
      }
      catch(Exception $e)
     {

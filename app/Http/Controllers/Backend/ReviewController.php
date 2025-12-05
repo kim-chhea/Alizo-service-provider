@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
 use App\Models\review;
 use App\Models\Service;
@@ -19,9 +20,9 @@ class ReviewController extends Controller
     {
         try
         {
-
-            $review = review::get();
-            if(!$review)
+            $reviews = review::with(['user:id,name', 'service:id,title'])->get();
+            
+            if($reviews->isEmpty())
             {
                 return response()->json([
                    'message' => 'No reviews found.',
@@ -29,9 +30,9 @@ class ReviewController extends Controller
                 ]);
             }
             return response()->json([
-                'message' => 'reviews retrieved successfully.',
+                'message' => 'Reviews retrieved successfully.',
                 'status' => 200,
-                'data' => $review,
+                'data' => $reviews,
             ]);
         }
         catch(Exception $e)
@@ -90,8 +91,7 @@ class ReviewController extends Controller
     {
         try
         {
-
-            $review = review::findOrFail($id);
+            $review = review::with(['user:id,name', 'service:id,title'])->findOrFail($id);
             return response()->json([
                 'message' => 'reviews retrieved successfully.',
                 'status' => 200,
@@ -133,9 +133,9 @@ class ReviewController extends Controller
             throw new CustomeExceptions('review updation failed due to an unexpected error.', 500);
           }
           return response()->json([
-            'message' => 'review updated successfully.',
+            'message' => 'Review updated successfully.',
             'status' => 200,
-            'data' => $review,
+            'data' => $review->load(['user:id,name', 'service:id,title']),
         ]);
 
         }

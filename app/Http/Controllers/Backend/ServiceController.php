@@ -1,12 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
+use App\Http\Resources\ServiceResource;
 use App\Models\Category;
 use App\Models\Service;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 /**
  * @OA\Tag(
@@ -45,7 +48,7 @@ class ServiceController extends Controller
             return response()->json([
                 'message' => 'services retrieved successfully.',
                 'status' => 200,
-                'data' => $service->load('categories')->except(['created_at', 'updated_at']),
+                'data' => ServiceResource::collection($service),
             ]);
         }
         catch(Exception $e) {
@@ -106,8 +109,7 @@ class ServiceController extends Controller
                 'price' => $ValidatedData['price'],
                 'image' => $fileName ?? null
             ]);
-
-            $service->categories()->attach($ValidatedData['category_id']);
+            $service->categories()->attach([$ValidatedData['category_id']]);
 
             if(!$service) {
                 throw new CustomeExceptions('service creation failed due to an unexpected error.', 500);
@@ -157,7 +159,7 @@ class ServiceController extends Controller
             return response()->json([
                 'message' => 'services retrieved successfully.',
                 'status' => 200,
-                'data' => $service->load('categories'),
+                'data' => new ServiceResource($service),
             ]);
         }
         catch(Exception $e) {
@@ -211,7 +213,7 @@ class ServiceController extends Controller
                 "category_id" => "sometimes|integer",
                 "image" => "sometimes|image|mimes:png,jpg,jpeg|max:2048"
             ]);
-
+            DB::beginTransaction();
             $service = Service::findOrFail($id);
 
             if(isset($ValidatedData['category_id'])) {
@@ -221,7 +223,7 @@ class ServiceController extends Controller
                     ->exists();
 
                 if(!$alreadyExit) {
-                    $service->categories()->attach($ValidatedData['category_id']);
+                    $service->categories()->sync($ValidatedData['category_id']);
                 } else {
                     return response()->json([
                         "messsge" => "that category already existed in the service",

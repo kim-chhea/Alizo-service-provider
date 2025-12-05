@@ -1,25 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend;
 
+use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
 use App\Models\booking;
-use App\Models\cart;
-use App\Models\review;
+use App\Models\Wishlist;
 use App\Models\Service;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
 
-use function PHPUnit\Framework\isEmpty;
-
-// use Illuminate\Support\Facades\Hash;
-/** 
-* @OA\Tag(
+/**
+ * @OA\Tag(
  *     name="Booking",
  *     description="APIs for managing bookings"
  * )
-     */
+ */
 class BookingController extends Controller
 {
 
@@ -36,19 +32,20 @@ class BookingController extends Controller
     {
         try
         {
-
-            $booking = booking::with(['user:id,name', 'services:id,title,price,description',])->get(['id', 'user_id',]);
-            if(!$booking)
+            $bookings = booking::with(['user:id,name', 'services:id,title,price,description'])->get();
+            
+            if($bookings->isEmpty())
             {
                 return response()->json([
                    'message' => 'No bookings found.',
                     'status' => 404,
                 ]);
             }
+            
             return response()->json([
-                'message' => 'booking retrieved successfully.',
+                'message' => 'Bookings retrieved successfully.',
                 'status' => 200,
-                'data' => $booking,
+                'data' => $bookings,
             ]);
         }
         catch(Exception $e)
@@ -90,10 +87,13 @@ class BookingController extends Controller
         try
         {
           $ValidatedData = $request->validate([
-            "user_id" => "required|integer|unique:bookings,user_id",
+            "user_id" => "required|integer|exists:users,id",
+            "note" => "nullable|string",
+            "scheduled" => "nullable|date",
+            "is_confirmed" => "nullable|boolean"
           ]);
-          //check if that user_id alrady have booking or not
-         $booking = booking::create($ValidatedData);
+          
+          $booking = booking::create($ValidatedData);
           if(!$booking)
           {
             throw new CustomeExceptions('booking creation failed due to an unexpected error.', 500);
@@ -132,8 +132,7 @@ class BookingController extends Controller
     {
         try
         {
-
-            $booking =booking::with(['services:id,title,description,price','user:id,name,email'])->select(['id','user_id'])->findOrFail($id);
+            $booking = booking::with(['services:id,title,description,price','user:id,name,email'])->findOrFail($id);
             return response()->json([
                 'message' => 'booking retrieved successfully.',
                 'status' => 200,
@@ -177,7 +176,10 @@ class BookingController extends Controller
         try
         {
             $ValidatedData = $request->validate([
-                "user_id" => "sometimes|integer|unique:bookings,user_id,".$id
+                "user_id" => "sometimes|integer|exists:users,id",
+                "note" => "nullable|string",
+                "scheduled" => "nullable|date",
+                "is_confirmed" => "nullable|boolean"
               ]);
 
               $booking = booking::findOrFail($id);
@@ -256,38 +258,38 @@ class BookingController extends Controller
         try
         {
 
-            $valideteData = $request->validate([
-                "booking_data" => "required|date",
+            $validatedData = $request->validate([
+                "booking_date" => "required|date",
                 "time_slot" => "required|date_format:H:i:s",
                 "status" => "required|string",
             ]);
-            //find is that booking is it exits or not
+            
             $booking = booking::findOrFail($bookingId);
-            $service = Service::findOrFail($serviceId);
+            Service::findOrFail($serviceId);
 
-            //find is that service already exit in that booking or not
-           $service = $booking->services()->where('service_id', $serviceId)->exists();
-           // return true or fail
-            if($service)
+            // Check if service already exists in booking
+            $exists = $booking->services()->where('service_id', $serviceId)->exists();
+            
+            if($exists)
             {
                 return response()->json([
-                    'message' => 'The services already had in that booking.'
-                ]);
-            } 
-            else 
-            {
-                $booking->services()->attach($serviceId,[
-                    "booking_date" => $valideteData['booking_data'],
-                    "time_slot" => $valideteData['time_slot'],
-                    "status" => $valideteData['status'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                    'message' => 'Service already exists in this booking.',
+                    'status' => 400
+                ], 400);
             }
+            
+            $booking->services()->attach($serviceId,[
+                "booking_date" => $validatedData['booking_date'],
+                "time_slot" => $validatedData['time_slot'],
+                "status" => $validatedData['status'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
             return response()->json([
                 'message' => 'Service added to booking successfully.',
                 'status' => 200,
-                'data' => $service
+                'data' => $booking->load('services')
             ]);
         }
         catch(Exception $e){
@@ -320,11 +322,11 @@ class BookingController extends Controller
     {
         try
         {
-        //find booking base on id 
         $booking = booking::findOrFail($bookingId);
-        $service = booking::findOrFail($serviceId);
-        $service = $booking->services()->where('service_id', $serviceId)->exists();
-        if(!$service)
+        
+        $exists = $booking->services()->where('service_id', $serviceId)->exists();
+        
+        if(!$exists)
         {
          throw new CustomeExceptions('Service not found in this booking' , 404);
         }
@@ -341,43 +343,77 @@ class BookingController extends Controller
                 throw new CustomeExceptions($e->getMessage() , 500);
         }
     }
-        public function checkoutfromcart(Request $request)
+    
+    /**
+     * @OA\Post(
+     *     path="/api/allizo/booking/checkout-wishlist",
+     *     tags={"Booking"},
+     *     summary="Create booking from wishlist",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"user_id"},
+     *             @OA\Property(property="user_id", type="integer"),
+     *             @OA\Property(property="note", type="string", nullable=true),
+     *             @OA\Property(property="scheduled", type="string", format="date", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Booking created from wishlist successfully"),
+     *     @OA\Response(response=400, description="Wishlist is empty or not found")
+     * )
+     */
+    public function checkoutFromWishlist(Request $request)
+    {
+        try
         {
-            //validate user id
             $data = $request->validate([
-                "user_id" => "required|integer|exists:users,id"
+                "user_id" => "required|integer|exists:users,id",
+                "note" => "nullable|string",
+                "scheduled" => "nullable|date"
             ]);
-            //check if that cart have service or not
-            $cart = cart::with('services')->get()->where('user_id', $data['user_id'])->first();
-            if(!$cart)
+            
+            $wishlist = Wishlist::with('services')->where('user_id', $data['user_id'])->first();
+            
+            if(!$wishlist || $wishlist->services->isEmpty())
             {
                 return response()->json([
-                    'message' => 'Cart is empty or not found',
+                    'message' => 'Wishlist is empty or not found',
                     'status' => 400
-                ]);
+                ], 400);
             }
-            //create new booking 
+            
+            // Create new booking
             $booking = booking::create([
-                'user_id' => $data['user_id']
+                'user_id' => $data['user_id'],
+                'note' => $data['note'] ?? null,
+                'scheduled' => $data['scheduled'] ?? now()->addDay(),
+                'is_confirmed' => false
             ]);
-            // Attach services from cart to booking
-            foreach ($cart->services as $service) {
+            
+            // Attach services from wishlist to booking
+            foreach ($wishlist->services as $service) {
                 $booking->services()->attach($service->id, [
-                    'booking_date' => now()->toDateString(),
-                    'time_slot' => now()->format('H:i:s'),
+                    'booking_date' => $data['scheduled'] ?? now()->addDay()->toDateString(),
+                    'time_slot' => '09:00:00',
                     'status' => 'pending',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
-            //clear cart list
-            $cart->services()->detach();
-             // Step 7: Return success response
-             return response()->json([
-                'message' => 'Booking created successfully from cart.',
+            
+            // Clear wishlist after checkout
+            $wishlist->services()->detach();
+            
+            return response()->json([
+                'message' => 'Booking created successfully from wishlist.',
                 'status' => 201,
                 'data' => $booking->load('services')
-    ]); 
+            ]);
         }
-        
+        catch(Exception $e)
+        {
+            throw new CustomeExceptions($e->getMessage(), 500);
+        }
+    }
+
 }
