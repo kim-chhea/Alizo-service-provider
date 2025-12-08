@@ -9,6 +9,7 @@ use App\Models\Wishlist;
 use App\Models\Service;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -89,10 +90,23 @@ class BookingController extends Controller
           $ValidatedData = $request->validate([
             "user_id" => "required|integer|exists:users,id",
             "note" => "nullable|string",
+            "subtotal" => "nullable|numeric",
+            "tax" => "nullable|numeric",
+            "discount_amount" => "nullable|numeric",
             "scheduled" => "nullable|date",
-            "is_confirmed" => "nullable|boolean"
+            "status" => "nullable|boolean",
+
+            "booking_item" => "nullable|array",
+            "booking_item.*.service_id" => "required_with:booking_item|integer|exists:services,id",
+            "booking_item.*.booking_id" => "required|with:booking_item|integer|exists:bookings,id",
+            "booking_item.*.discount_id" => "required|exists:discounts,id",
+            "booking_item.*.quantity" => "required_with:booking_item|integer",
+            "booking_item.*.total_price" => "required_with:booking_item|numeric",
+            "booking_item.*.note" => "required|string",
+            "booking_item.*.status" => "required|string",
+
           ]);
-          
+          DB::beginTransaction();
           $booking = booking::create($ValidatedData);
           if(!$booking)
           {
@@ -132,7 +146,7 @@ class BookingController extends Controller
     {
         try
         {
-            $booking = booking::with(['services:id,title,description,price','user:id,name,email'])->findOrFail($id);
+            $booking = booking::with(['services','user'])->findOrFail($id);
             return response()->json([
                 'message' => 'booking retrieved successfully.',
                 'status' => 200,

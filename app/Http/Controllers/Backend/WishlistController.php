@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Exceptions\CustomeExceptions;
 use App\Http\Resources\WishlistResource;
+use App\Http\Resources\WishlistServiceResource;
 use App\Models\wishlist;
 use Exception;
 use Illuminate\Http\Request;
@@ -258,24 +259,29 @@ class WishlistController extends Controller
     {
         try 
         {
-            $valideteData = $request->validate([
-                "service_id" => "required|array|exists:services,id",
+            $validated = $request->validate([
+                "service_id" => "required|array",
+                "service_id.*" => "exists:services,id",
             ]);
-            $wishlist = wishlist::findOrFail($wishlistId);
-            foreach ($valideteData['service_id'] as $service_id)
-            {
-                $wishlist->services()->attach($service_id);
-                if($wishlist->services()->where('service_id', $service_id)->exists()) 
-                {
-                    return response()->json([
-                        'message' => 'Service already exists in this wishlist.',
-                        'status' => 400
-                    ]);
 
-                }
+            $wishlist = Wishlist::findOrFail($wishlistId);
+            
+            // Get currently attached service IDs
+            $existingServices = $wishlist->services()->pluck('service_id')->toArray();
+            
+            // Filter out services that are already attached
+            $newServices = array_diff($validated['service_id'], $existingServices);
+            
+            // Only attach new services if there are any
+            if (!empty($newServices)) {
+                $wishlist->services()->attach($newServices);
             }
+            
+            $wishlist->refresh();
+
             return response()->json([
-                'message' => 'Service added to wishlist successfully.',
+                'message' => 'Services processed successfully.',
+                'data' => new WishlistResource($wishlist),
                 'status' => 200
             ]);
         } 

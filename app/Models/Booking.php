@@ -14,7 +14,7 @@ class booking extends Model
     
     public function services()
     {
-        return $this->belongsToMany(Service::class,'booking_items')->withTimestamps()->withPivot(['booking_date', 'time_slot', 'status']);
+        return $this->belongsToMany(Service::class,'booking_items')->withTimestamps();
     }
     
     public function user()
