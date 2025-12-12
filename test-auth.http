@@ -1,0 +1,36 @@
+### Test Registration
+POST http://localhost:8000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "testuser@example.com",
+  "password": "password123",
+  "first_name": "Test",
+  "sure_name": "User",
+  "work_position": "Software Developer",
+  "gender": "male"
+}
+
+### Test Login
+POST http://localhost:8000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "password123"
+}
+
+### Test Logout (Replace YOUR_TOKEN with actual token)
+DELETE http://localhost:8000/api/auth/logout
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+### Test Login with Wrong Password
+POST http://localhost:8000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "wrongpassword"
+}

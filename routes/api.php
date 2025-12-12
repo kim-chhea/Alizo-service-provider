@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Auth Routes (Public - No authentication required)
-// require __DIR__ . '/AuthAPI.php';
+require __DIR__ . '/AuthAPI.php';
 
 // API Version 1 Routes
 Route::prefix('allizo/v1')->group(function () {
