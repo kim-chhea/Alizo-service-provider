@@ -2,11 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\payment;
-use Illuminate\Support\Str;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
+use Illuminate\Support\Facades\DB;
 
 class PaymentSeeder extends Seeder
 {
@@ -15,22 +12,27 @@ class PaymentSeeder extends Seeder
      */
     public function run(): void
     {
-        //
-        $payments = [
-            ['booking_id' => 1, 'price' => 500.00, 'status' => 'paid',    'payment_method' => 'PayWay', 'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-            ['booking_id' => 2, 'price' => 150.00, 'status' => 'pending', 'payment_method' => 'ABA',    'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-            ['booking_id' => 3, 'price' => 300.00, 'status' => 'paid',    'payment_method' => 'Wing',   'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-            ['booking_id' => 4, 'price' => 200.00, 'status' => 'failed',  'payment_method' => 'Wing',   'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-            ['booking_id' => 5, 'price' => 100.00, 'status' => 'paid',    'payment_method' => 'ABA',    'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-            ['booking_id' => 6, 'price' => 50.00,  'status' => 'pending', 'payment_method' => 'PayWay', 'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-            ['booking_id' => 7, 'price' => 120.00, 'status' => 'paid',    'payment_method' => 'ABA',    'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-            ['booking_id' => 8, 'price' => 80.00,  'status' => 'failed',  'payment_method' => 'Wing',   'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-            ['booking_id' => 9, 'price' => 250.00, 'status' => 'pending', 'payment_method' => 'PayWay', 'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-            ['booking_id' => 10,'price' => 75.00,  'status' => 'paid',    'payment_method' => 'ABA',    'transaction_id' => 'TXN-' . strtoupper(Str::random(10))],
-        ];
-
-        foreach ($payments as $payment) {
-            payment::create($payment);
-        }
+        DB::table('payments')->insert([
+            [
+                'booking_id' => 1,
+                'transaction_id' => 'TXN123456',
+                'discount_id' => null,
+                'discount_amount' => 0.00,
+                'status' => 'pending',
+                'payment_method' => 'credit_card',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'booking_id' => 2,
+                'transaction_id' => 'TXN789012',
+                'discount_id' => 1,
+                'discount_amount' => 10.00,
+                'status' => 'paid',
+                'payment_method' => 'paypal',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 }

@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreign('service_id')->references('id')->on('services')->cascadeOnUpdate()->cascadeOnDelete();
             $table->unsignedBigInteger('booking_id');
             $table->foreign('booking_id')->references('id')->on('bookings')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->date('booking_date');
-            $table->time('time_slot');
+            $table->integer('quantity')->default(1);
+            $table->string('note');
             $table->enum('status',['pending', 'confirmed', 'cancelled'])->default('pending');
             $table->timestamps();
         });
